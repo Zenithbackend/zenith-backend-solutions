@@ -455,4 +455,50 @@
     }
     updateDock();
   }
+
+  /* ---------- industry cards: mouse-tracked spotlight ---------- */
+  var indCards = $$('.industry-card');
+  if (indCards.length && finePointer && !reduce) {
+    indCards.forEach(function (card) {
+      card.addEventListener('pointermove', function (e) {
+        var r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
+
+  /* ---------- hero scroll parallax (subtle, rAF-throttled) ---------- */
+  var heroEl = $('.hero');
+  if (heroEl && !reduce) {
+    var heroTicking = false;
+    var onHeroScroll = function () {
+      var r = heroEl.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight) {
+        var p = Math.max(-1, Math.min(1, -r.top / (r.height || 1)));
+        heroEl.style.setProperty('--py', (p * 36).toFixed(1) + 'px');
+      }
+      heroTicking = false;
+    };
+    onHeroScroll();
+    window.addEventListener('scroll', function () {
+      if (!heroTicking) { heroTicking = true; requestAnimationFrame(onHeroScroll); }
+    }, { passive: true });
+  }
+
+  /* ---------- magnetic / glow CTAs ---------- */
+  var magnets = $$('[data-magnetic]');
+  if (magnets.length && finePointer && !reduce) {
+    magnets.forEach(function (btn) {
+      btn.addEventListener('pointermove', function (e) {
+        var r = btn.getBoundingClientRect();
+        var mx = e.clientX - r.left, my = e.clientY - r.top;
+        btn.style.setProperty('--mx', mx + 'px');
+        btn.style.setProperty('--my', my + 'px');
+        var dx = (mx / r.width - 0.5) * 8, dy = (my / r.height - 0.5) * 8;
+        btn.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+      });
+      btn.addEventListener('pointerleave', function () { btn.style.transform = ''; });
+    });
+  }
 })();
